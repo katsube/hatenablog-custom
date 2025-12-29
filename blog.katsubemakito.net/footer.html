@@ -2,64 +2,160 @@
 <div id="back-to-top"><i class="fa fa-arrow-up"></i></div>
 
 <script type="text/javascript">
-//-----------------------------------
-// ヘッダ画像を広げる
-//-----------------------------------
+//--------------------------------------------------------------
+// ページ全体
+//--------------------------------------------------------------
 window.addEventListener("DOMContentLoaded", ()=>{
- const blogTitle = document.querySelector("#blog-title");
- blogTitle.setAttribute("style",
-   "background-image: url('https://cdn-ak.f.st-hatena.com/images/fotolife/k/katsube/20231006/20231006005542.jpg');" + 
-   "background-repeat:no-repeat;"+
-   "background-size: cover;" +
-   "padding-top:0px;"
- );
-  const blogTitleInner = document.querySelector("#blog-title-inner");
-  blogTitleInner.setAttribute("style",
-    "background-image: none;" +
-    "padding-top: 20px;"
-  );
-});
+  //-----------------------------------
+  // ヘッダ画像を広げる
+  //-----------------------------------
+  (() => {
+    const blogTitle = document.querySelector("#blog-title");
+    blogTitle.setAttribute("style",
+      "background-image: url('https://cdn-ak.f.st-hatena.com/images/fotolife/k/katsube/20231006/20231006005542.jpg');" + 
+      "background-repeat:no-repeat;"+
+      "background-size: cover;" +
+      "padding-top:0px;"
+    );
+      const blogTitleInner = document.querySelector("#blog-title-inner");
+      blogTitleInner.setAttribute("style",
+        "background-image: none;" +
+        "padding-top: 20px;"
+      );
+  })();
+
+  //-----------------------------------
+  // 上にもどるボタン
+  //-----------------------------------
+  (() => {
+    const btn = document.getElementById("back-to-top");
+    if (!btn) return;
+    const showOffset = 200;
+
+    window.addEventListener("scroll", () => {
+      const y = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (y > showOffset) {
+        btn.classList.add("is-visible");
+      }
+      else if (y <= 10) {  // 上に10px余白が残っていてもボタンを消す
+        btn.classList.remove("is-visible");
+      }
+    }, { passive: true });
+
+    btn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  })();
 
 
-//-----------------------------------
-// 目次をolに置換
-//-----------------------------------
-window.addEventListener("DOMContentLoaded", ()=>{
-  const uls = document.querySelectorAll('.table-of-contents ul, .table-of-contents');
-  Array.from(uls).forEach(ul => {
-    const ol = document.createElement('ol');
-    for (const attr of ul.attributes) {
-      ol.setAttribute(attr.name, attr.value);
+  //--------------------------------------------------------------
+  // 記事ページ
+  //--------------------------------------------------------------
+  //----------------------------------------
+  // SNSシェアボタン
+  //----------------------------------------
+  (() => {
+    const url = location.href;
+    const title = document.title;
+
+    // SNSシェアリンク設定
+    document.querySelectorAll("[data-share]").forEach(el => {
+      const type = el.dataset.share;
+      let shareUrl = "";
+
+      switch (type) {
+        case "x":
+          shareUrl = "https://twitter.com/intent/tweet?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(title);
+          break;
+        case "facebook":
+          shareUrl = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url);
+          break;
+        case "hatena":
+          shareUrl = "https://b.hatena.ne.jp/entry/" + encodeURIComponent(url);
+          break;
+      }
+      el.href = shareUrl;
+    });
+
+    // URLコピー
+    document.querySelectorAll(".share-btn.copy").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!navigator.clipboard) {
+          alert("このブラウザではコピーできません");
+          return;
+        }
+
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            alert("URLをコピーしました");
+          })
+          .catch(() => {
+            alert("コピーに失敗しました");
+          });
+      });
+    });
+  })();
+
+  //----------------------------------------
+  // 2年以上前の投稿なら警告文を追加
+  //----------------------------------------
+  (()=>{
+    const entrydate = document.querySelector('.entry .entry-inner .entry-header .entry-date time').getAttribute('datetime')
+    const time = new Date(entrydate);
+    const now = new Date();
+
+    if (time.getFullYear() < (now.getFullYear() - 2)) {
+          const year_diff = Math.floor( (now.getTime() - time.getTime()) / (1000 * 60 * 60 * 24 * 365) );
+      const entry = document.querySelector('.entry-content');
+      const div  = document.createElement('div');
+      div.classList.add('ws-info1');
+      div.innerHTML = `<i class="fa-solid fa-circle-info fa-xl"></i> この記事は<strong>${year_diff}年以上前</strong>に投稿されたものです`;
+      entry.insertBefore(div, entry.firstChild);
     }
+  })();
 
-    while (ul.firstChild) {
-      ol.appendChild(ul.firstChild);
-    }
+  //-----------------------------------
+  // 目次をolに置換
+  //-----------------------------------
+  (()=>{
+    const uls = document.querySelectorAll('.table-of-contents ul, .table-of-contents');
+    Array.from(uls).forEach(ul => {
+      const ol = document.createElement('ol');
+      for (const attr of ul.attributes) {
+        ol.setAttribute(attr.name, attr.value);
+      }
 
-    ul.parentNode.replaceChild(ol, ul);
-  });
-});
+      while (ul.firstChild) {
+        ol.appendChild(ul.firstChild);
+      }
 
-//-----------------------------------
-// 言語名を表示
-//-----------------------------------
-window.addEventListener("load", function onLoad() {
-  window.removeEventListener("load", onLoad);
-  document.querySelectorAll("pre.code").forEach( (code)=>{
-    const lang = code.getAttribute("data-lang");
-    if ( lang ) {
-      code.dataset.langLabel =  lang;
-    }
-  });
-});
+      ul.parentNode.replaceChild(ol, ul);
+    });
+  })();
 
-//-----------------------------------
-// コメント欄
-//-----------------------------------
-document.addEventListener("DOMContentLoaded", () => {
+  //-----------------------------------
+  // code内に言語名を表示
+  //-----------------------------------
+  (()=>{
+    const onLoad = () => {
+      document.querySelectorAll("pre.code").forEach( (code)=>{
+        const lang = code.getAttribute("data-lang");
+        if ( lang ) {
+          code.dataset.langLabel =  lang;
+        }
+      });
+    };
+    window.addEventListener("load", onLoad);
+  })();
+
+  //-----------------------------------
+  // コメント欄
   //-----------------------------------
   // コメント欄とボタンを目立たせる
-  //-----------------------------------
   (() => {
     // 一覧ページでは適用しない
     const entries = document.querySelectorAll(".entry-content");
@@ -83,9 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.innerHTML = "💬 コメントを書く";
   })();
 
-  //-----------------------------------
   // コメント欄にid付与
-  //-----------------------------------
   (() => {
     const commentBox =
       document.querySelector('.comment-box')
@@ -95,34 +189,88 @@ document.addEventListener("DOMContentLoaded", () => {
       commentBox.id = 'comment-area';
     }
   })();
+
+  //----------------------------------------
+  // 記事中にAdSenseを自然配置
+  //----------------------------------------
+  (() => {
+    // 広告DOM生成
+    const createAd = () => {
+      const div = document.createElement('div');
+      div.style.cssText = 'text-align:center; color:lightgray; margin:32px 8px;';
+      div.textContent = '- Sponsored Link -';
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5907690882482255';
+      script.crossOrigin = 'anonymous';
+
+      const ins = document.createElement('ins');
+      ins.className = 'adsbygoogle';
+      ins.style.cssText = 'display:inline-block;width:656px;height:180px';
+      ins.dataset.adClient = 'ca-pub-5907690882482255';
+      ins.dataset.adSlot = '1452100314';
+
+      const script2 = document.createElement('script');
+      script2.textContent = '(adsbygoogle = window.adsbygoogle || []).push({});';
+
+      div.append(script, ins, script2);
+      return div;
+    };
+
+    // 共通ユーティリティ
+    const isHeading   = el => el && /^H[1-6]$/.test(el.tagName);
+    const isForbidden = el => el.closest('pre, code, ul, ol, blockquote, .hatena-asin-detail, .amazlet-box');
+
+    // 対象コンテンツ
+    const content = document.querySelector('.entry-content');
+    if (!content) return;
+
+    // ① TOC直下に必ず1件
+    const toc = content.querySelector('.table-of-contents');
+    if (toc) {
+      toc.after(createAd());
+    }
+
+    // ② 全体文字量を計算
+    const paragraphs = [...content.querySelectorAll('p')]
+      .filter(p => !isForbidden(p));
+    const totalChars = paragraphs
+      .map(p => p.textContent.length)
+      .reduce((a, b) => a + b, 0);
+
+    // ③ 掲載数を決定（本文分）
+    const MAX_ADS = 3;          // 本文中の最大数
+    const charsPerAd = 1000;
+
+    const adCount = Math.min(
+      MAX_ADS,
+      Math.floor(totalChars / charsPerAd)
+    );
+
+    if (adCount === 0) return;
+
+    // ④ 均等配置
+    const interval = totalChars / (adCount + 1);
+    let acc = 0;
+    let inserted = 0;
+    let nextTarget = interval;
+
+    for (const p of paragraphs) {
+      acc += p.textContent.length;
+
+      if (
+        acc >= nextTarget &&
+        inserted < adCount &&
+        !isHeading(p.previousElementSibling) // ← 見出し直下を完全回避
+      ) {
+        p.before(createAd());
+        inserted++;
+        nextTarget += interval;
+      }
+    }
+  })();
+
+// DOMContentLoaded
 });
-
-
-//-----------------------------------
-// 上にもどるボタン
-//-----------------------------------
-(() => {
-  const btn = document.getElementById("back-to-top");
-  if (!btn) return;
-
-  const showOffset = 200;
-
-  window.addEventListener("scroll", () => {
-    const y = window.pageYOffset || document.documentElement.scrollTop;
-
-    if (y > showOffset) {
-      btn.classList.add("is-visible");
-    }
-    else if (y <= 10) {  // 上に10px余白が残っていてもボタンを消す
-      btn.classList.remove("is-visible");
-    }
-  }, { passive: true });
-
-  btn.addEventListener("click", () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  });
-})();
 </script>
