@@ -64,18 +64,19 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
     // SNSシェアリンク設定
     document.querySelectorAll("[data-share]").forEach(el => {
-      const type = el.dataset.share;
+      const url_encoded = encodeURIComponent(url);
+      const title_encoded = encodeURIComponent(title);
       let shareUrl = "";
 
-      switch (type) {
+      switch (el.dataset.share) {
         case "x":
-          shareUrl = "https://twitter.com/intent/tweet?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(title);
+          shareUrl = `https://twitter.com/intent/tweet?url=${url_encoded}&text=${title_encoded}`;
           break;
         case "facebook":
-          shareUrl = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url);
+          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url_encoded}`;
           break;
         case "hatena":
-          shareUrl = "https://b.hatena.ne.jp/entry/" + encodeURIComponent(url);
+          shareUrl = `https://b.hatena.ne.jp/entry/${url_encoded}`;
           break;
       }
       el.href = shareUrl;
@@ -94,7 +95,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
             alert("URLをコピーしました");
           })
           .catch(() => {
-            alert("コピーに失敗しました");
+            alert("URLのコピーに失敗しました");
           });
       });
     });
