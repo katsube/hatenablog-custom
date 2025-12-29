@@ -1,0 +1,128 @@
+<!-- 上にもどるボタン -->
+<div id="back-to-top"><i class="fa fa-arrow-up"></i></div>
+
+<script type="text/javascript">
+//-----------------------------------
+// ヘッダ画像を広げる
+//-----------------------------------
+window.addEventListener("DOMContentLoaded", ()=>{
+ const blogTitle = document.querySelector("#blog-title");
+ blogTitle.setAttribute("style",
+   "background-image: url('https://cdn-ak.f.st-hatena.com/images/fotolife/k/katsube/20231006/20231006005542.jpg');" + 
+   "background-repeat:no-repeat;"+
+   "background-size: cover;" +
+   "padding-top:0px;"
+ );
+  const blogTitleInner = document.querySelector("#blog-title-inner");
+  blogTitleInner.setAttribute("style",
+    "background-image: none;" +
+    "padding-top: 20px;"
+  );
+});
+
+
+//-----------------------------------
+// 目次をolに置換
+//-----------------------------------
+window.addEventListener("DOMContentLoaded", ()=>{
+  const uls = document.querySelectorAll('.table-of-contents ul, .table-of-contents');
+  Array.from(uls).forEach(ul => {
+    const ol = document.createElement('ol');
+    for (const attr of ul.attributes) {
+      ol.setAttribute(attr.name, attr.value);
+    }
+
+    while (ul.firstChild) {
+      ol.appendChild(ul.firstChild);
+    }
+
+    ul.parentNode.replaceChild(ol, ul);
+  });
+});
+
+//-----------------------------------
+// 言語名を表示
+//-----------------------------------
+window.addEventListener("load", function onLoad() {
+  window.removeEventListener("load", onLoad);
+  document.querySelectorAll("pre.code").forEach( (code)=>{
+    const lang = code.getAttribute("data-lang");
+    if ( lang ) {
+      code.dataset.langLabel =  lang;
+    }
+  });
+});
+
+//-----------------------------------
+// コメント欄
+//-----------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  //-----------------------------------
+  // コメント欄とボタンを目立たせる
+  //-----------------------------------
+  (() => {
+    // 一覧ページでは適用しない
+    const entries = document.querySelectorAll(".entry-content");
+    if (entries.length !== 1)
+      return;
+
+    // クラス追加
+    const box = document.querySelector(".js-comment-box");
+    const btn = box?.querySelector(".js-leave-comment-title");
+    if (!box || !btn)
+      return;
+    box.classList.add("comment-cta-big");
+
+    // 文言追加
+    const after = document.createElement("p");
+    after.className = "comment-note after";
+    after.innerHTML = '感想や質問などお気軽にどうぞ。<br>コメントを書き込むには「<a href="https://www.hatena.ne.jp/" target="_blank"><u>はてな</u></a>」のアカウントで<a href="https://accounts.hatena.ne.jp/login"><u>ログイン</u></a>が必要です。';
+    box.appendChild(after);
+
+    // ボタンの文言設定
+    btn.innerHTML = "💬 コメントを書く";
+  })();
+
+  //-----------------------------------
+  // コメント欄にid付与
+  //-----------------------------------
+  (() => {
+    const commentBox =
+      document.querySelector('.comment-box')
+      || document.querySelector('.js-comment-box');
+
+    if (commentBox && !commentBox.id) {
+      commentBox.id = 'comment-area';
+    }
+  })();
+});
+
+
+//-----------------------------------
+// 上にもどるボタン
+//-----------------------------------
+(() => {
+  const btn = document.getElementById("back-to-top");
+  if (!btn) return;
+
+  const showOffset = 200;
+
+  window.addEventListener("scroll", () => {
+    const y = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (y > showOffset) {
+      btn.classList.add("is-visible");
+    }
+    else if (y <= 10) {  // 上に10px余白が残っていてもボタンを消す
+      btn.classList.remove("is-visible");
+    }
+  }, { passive: true });
+
+  btn.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+})();
+</script>
