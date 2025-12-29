@@ -121,9 +121,9 @@ dd{
       #f5f5f5 37%,
       #eee 63%);
   background-size: 400% 100%;
-  animation: loadingimage 1.4s ease infinite;
+  animation: nowloadingimg 1.4s ease infinite;
 }
-@keyframes loadingimage {
+@keyframes nowloadingimg {
   0% { background-position: 100% 0; }
   100% { background-position: 0 0; }
 }
