@@ -93,11 +93,11 @@ dd{
  gap: 3px;
  flex-wrap: wrap;
 }
-.hatena-module-custom-pr2 .hatena-module-body a{
+.hatena-module-custom-pr2 .hatena-module-body .hatena-module-custom-pr2-books a{
  flex: 1 1 140px;
  min-width: 130px;
 }
-.hatena-module-custom-pr2 .hatena-module-body a img{
+.hatena-module-custom-pr2 .hatena-module-body .hatena-module-custom-pr2-books a img{
  width: 100%;
  height: auto;
  display: block;
